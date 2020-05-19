@@ -24,19 +24,16 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        stopRecordingButton.isHidden = true
+        configureRecordingUI(false)
     }
 
     @IBAction func recordAudio(_ sender: AnyObject) {
-        stopRecordingButton.isHidden = false
-        recordButton.isHidden = true
-        recordingLabel.text = "Recording In Progress"
+        configureRecordingUI(true)
         
         let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory,.userDomainMask, true)[0] as String
         let recordingName = "recordedVoice.wav"
         let pathArray = [dirPath, recordingName]
         let filePath = URL(string: pathArray.joined(separator: "/"))
-        print(filePath!)
         let session = AVAudioSession.sharedInstance()
         try! session.setCategory(AVAudioSession.Category.playAndRecord, mode: AVAudioSession.Mode.default, options: AVAudioSession.CategoryOptions.defaultToSpeaker)
 
@@ -45,12 +42,22 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         audioRecorder.isMeteringEnabled = true
         audioRecorder.prepareToRecord()
         audioRecorder.record()
-}
+    }
+    
+    func configureRecordingUI(_ recording: Bool) -> Void {
+        if recording {
+            stopRecordingButton.isHidden = false
+            recordButton.isHidden = true
+            recordingLabel.text = "Recording In Progress"
+        } else {
+            recordButton.isHidden = false
+            stopRecordingButton.isHidden = true
+            recordingLabel.text = "Tap to record"
+        }
+    }
 
     @IBAction func stopRecording(_ sender: Any) {
-        recordButton.isHidden = false
-        stopRecordingButton.isHidden = true
-        recordingLabel.text = "Tap to record"
+        configureRecordingUI(false)
         
         audioRecorder.stop()
         let audioSession = AVAudioSession.sharedInstance()
@@ -69,7 +76,7 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         if segue.identifier == "stopRecording" {
             let playSoundsVC = segue.destination as! PlaySoundsViewController
             let recordedAudioURL = sender as! URL
-            playSoundsVC.recordedAudioUrl = recordedAudioURL
+            playSoundsVC.recordedAudioURL = recordedAudioURL
         }
     }
 }
